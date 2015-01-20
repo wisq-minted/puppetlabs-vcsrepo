@@ -79,7 +79,7 @@ Puppet::Type.type(:vcsrepo).provide(:git, :parent => Puppet::Provider::Vcsrepo) 
   end
 
   def mirror_exists?
-    at_path { git('config', "remote.#{@resource.value(:remote)}.mirror") == 'true' }
+    bare_git_config_exists? && at_path { git('config', "remote.#{@resource.value(:remote)}.mirror") == 'true' }
   end
 
   def bare_exists?
