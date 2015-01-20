@@ -5,7 +5,7 @@ Puppet::Type.type(:vcsrepo).provide(:git, :parent => Puppet::Provider::Vcsrepo) 
 
   commands :git => 'git'
 
-  has_features :bare_repositories, :reference_tracking, :ssh_identity, :multiple_remotes, :user, :depth, :submodules
+  has_features :bare_repositories, :reference_tracking, :ssh_identity, :multiple_remotes, :user, :depth, :submodules, :mirror
 
   def create
     if @resource.value(:revision) and @resource.value(:ensure) == :bare
@@ -78,6 +78,10 @@ Puppet::Type.type(:vcsrepo).provide(:git, :parent => Puppet::Provider::Vcsrepo) 
     update_owner_and_excludes
   end
 
+  def mirror_exists?
+    at_path { git('config', "remote.#{@resource.value(:remote)}.mirror") == 'true' }
+  end
+
   def bare_exists?
     bare_git_config_exists? && !working_copy_exists?
   end
@@ -128,6 +132,9 @@ Puppet::Type.type(:vcsrepo).provide(:git, :parent => Puppet::Provider::Vcsrepo) 
     end
     if @resource.value(:ensure) == :bare
       args << '--bare'
+    end
+    if @resource.value(:ensure) == :mirror
+      args << '--mirror'
     end
     if @resource.value(:remote) != 'origin'
       args.push('--origin', @resource.value(:remote))
